@@ -24,7 +24,7 @@ const serverUrl = process.env.SERVER_URL;
 const bot = new TelegramBot(token);
 
 // ВАЖНО: Укажите здесь имя пользователя вашего бота (без @)
-const botUsername = 'YourBotUsername'; // Например, 'TerraRunBot'
+const botUsername = 'TerraRunbot'; // Например, 'TerraRunBot'
 
 // Настраиваем вебхук. Telegram будет присылать обновления сюда, а не через getUpdates.
 // Это более эффективно для продакшена.
