@@ -16,7 +16,7 @@ const botUsername = 'TerraRunbot';
 // ВАЖНО: Укажите здесь публичный URL вашего сервера.
 // Telegram будет отправлять обновления на этот адрес.
 // Например: https://your-app-name.onrender.com или IP вашего сервера.
-const serverUrl = 'https://djfhdsjf-8baf.vercel.app'; // <--- ЗАМЕНИТЕ ЭТОТ АДРЕС!
+const serverUrl = 'https://djfhdsjf-y8m4.vercel.app'; // <--- ЗАМЕНИТЕ ЭТОТ АДРЕС!
 
 // Проверка, что URL сервера был изменен
 if (serverUrl === 'https://YOUR_SERVER_URL_HERE') {
