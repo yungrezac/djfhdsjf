@@ -11,7 +11,7 @@ require('dotenv').config(); // Для безопасного хранения т
 // ВАЖНО: Никогда не вписывайте токен прямо в код.
 // Создайте рядом с этим файлом файл с названием .env
 // и напишите внутри него: TELEGRAM_BOT_TOKEN=ВАШ_ТОКЕН_СЮДА
-const token = process.env.TELEGRAM_BOT_TOKEN;
+const token = 8203577700:AAHBPcxw4y5kT4trl_bfZY4QRBQ99Q0S2E8
 if (!token) {
     console.error("Ошибка: Токен бота не найден. Создайте .env файл и добавьте TELEGRAM_BOT_TOKEN.");
     process.exit(1);
