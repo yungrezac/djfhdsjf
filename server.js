@@ -13,81 +13,75 @@ const token = '8203577700:AAHBPcxw4y5kT4trl_bfZY4QRBQ99Q0S2E8';
 // Имя пользователя вашего бота (без @)
 const botUsername = 'TerraRunbot';
 
-// ВАЖНО: Укажите здесь публичный URL вашего сервера.
-// Telegram будет отправлять обновления на этот адрес.
-// Например: https://your-app-name.onrender.com или IP вашего сервера.
-const serverUrl = 'https://djfhdsjf-y8m4.vercel.app'; // <--- ЗАМЕНИТЕ ЭТОТ АДРЕС!
+// ВАЖНО: Укажите здесь публичный URL вашего Vercel-приложения.
+// Вы получите его после первого развертывания.
+// Например: https://your-app-name.vercel.app
+const serverUrl = 'https://djfhdsjf.vercel.app'; // <--- ЗАМЕНИТЕ ЭТОТ АДРЕС!
 
 // Проверка, что URL сервера был изменен
-if (serverUrl === 'https://YOUR_SERVER_URL_HERE') {
-    console.error("-------------------------------------------------------------------");
-    console.error("ОШИБКА: Пожалуйста, замените 'https://YOUR_SERVER_URL_HERE' на");
-    console.error("реальный публичный URL вашего сервера в коде.");
-    console.error("-------------------------------------------------------------------");
+if (serverUrl.includes('YOUR_SERVER_URL_HERE')) {
+    console.error("ОШИБКА: Замените 'YOUR_SERVER_URL_HERE' на реальный URL вашего Vercel-приложения.");
     process.exit(1);
 }
 
 const bot = new TelegramBot(token);
-
-// Настраиваем вебхук. Telegram будет присылать обновления сюда.
-// Это более эффективно для продакшена, чем постоянные запросы.
-bot.setWebHook(`${serverUrl}/bot${token}`);
-
 const app = express();
+
 // Middleware для парсинга JSON-тела запросов от Telegram
 app.use(express.json());
 
 // --- ЛОГИКА БОТА ---
 
+// ЭТОТ ЭНДПОИНТ НУЖНО ВЫЗВАТЬ ОДИН РАЗ ПОСЛЕ РАЗВЕРТЫВАНИЯ
+// Просто откройте в браузере https://<ваш-домен>.vercel.app/api/set-webhook
+app.get('/api/set-webhook', async (req, res) => {
+    try {
+        const webhookUrl = `${serverUrl}/api/bot${token}`;
+        await bot.setWebHook(webhookUrl);
+        res.status(200).json({ status: 'success', message: `Webhook установлен на ${webhookUrl}` });
+    } catch (error) {
+        console.error('Ошибка установки вебхука:', error);
+        res.status(500).json({ status: 'error', message: error.message });
+    }
+});
+
 // Обработчик команды /start
 bot.onText(/\/start/, (msg) => {
     const chatId = msg.chat.id;
     const text = "Добро пожаловать в TerraRun! Готовы захватывать территории?";
-
-    // Создаем кнопку, которая будет открывать ваше веб-приложение (Web App)
     const keyboard = {
         inline_keyboard: [
             [{
                 text: '🚀 Открыть карту и начать!',
-                // URL должен вести на специальную страницу запуска вашего Web App в Telegram
                 web_app: { url: `https://t.me/${botUsername}/app` }
             }]
         ]
     };
-
-    bot.sendMessage(chatId, text, {
-        reply_markup: keyboard,
-    });
+    bot.sendMessage(chatId, text, { reply_markup: keyboard });
 });
 
-// Обработчик всех входящих обновлений от Telegram (через вебхук)
-// Telegram будет отправлять POST-запросы на этот URL
-app.post(`/bot${token}`, (req, res) => {
+// Основной обработчик для входящих обновлений от Telegram
+// Vercel будет направлять запросы с /api/bot<TOKEN> сюда
+app.post(`/api/bot${token}`, (req, res) => {
     bot.processUpdate(req.body);
     res.sendStatus(200); // Отвечаем Telegram, что все в порядке
 });
 
-
-// --- API ДЛЯ ВЗАИМОДЕЙСТВИЯ С ФРОНТЕНДОМ (Пример) ---
-// Этот эндпоинт можно использовать для проверки, что сервер работает
+// Эндпоинт для проверки работоспособности
 app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', message: 'Server is running' });
-});
-
-
-// --- ЗАПУСК СЕРВЕРА ---
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Сервер успешно запущен на порту ${PORT}`);
-    console.log(`Вебхук для бота настроен на: ${serverUrl}/bot${token}`);
-    console.log(`Ваше приложение должно быть доступно по адресу: https://t.me/${botUsername}/app`);
+    res.json({ status: 'ok', message: 'Server is running on Vercel' });
 });
 
 // --- Обработка ошибок бота ---
 bot.on('webhook_error', (error) => {
-  console.error('Webhook Error:', error.code);  // Например, 'EPARSE'
+  console.error('Webhook Error:', error.code);
 });
 
 bot.on('polling_error', (error) => {
-  console.error('Polling Error:', error.code); // Например, 'EFATAL'
+  console.error('Polling Error:', error.code);
 });
+
+// --- ЭКСПОРТ ДЛЯ VERCEL ---
+// Вместо app.listen() мы экспортируем приложение.
+// Vercel автоматически подхватит его и создаст бессерверную функцию.
+module.exports = app;
